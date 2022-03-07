@@ -237,7 +237,12 @@ class Project():
                 log.warning(f"Directory {target.output_dir()} already does not exist, nothing to clean.")
             else:
                 log.warning(f"Destroying directory {target.output_dir()} to clean previously built files.")
-                shutil.rmtree(target.output_dir())
+                # use this callback function to print any errors from trying to clean.
+                # towards a fix for #188.
+                def print_the_error(func, path, excinfo):
+                    print(f"Could not remove {path}. Attempting to continue.")
+                # now try to delete the paths 
+                shutil.rmtree(target.output_dir(), onerror=print_the_error)
         #if custom xsl, copy it into a temporary directory (different from the building temporary directory)
         custom_xsl = None
         temp_xsl_dir = None
